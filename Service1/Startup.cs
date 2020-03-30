@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Service1
 {
@@ -25,27 +18,34 @@ namespace Service1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
             services.AddSingleton<MessagingQueueService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
 
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapGet("/", async context =>
+                {
+                    Microsoft.Extensions.Primitives.StringValues queryString;
+
+                    using var scope = app.ApplicationServices.CreateScope();
+                    var messagequeue = scope.ServiceProvider.GetRequiredService<MessagingQueueService>();
+
+                    if (context.Request.Query.TryGetValue("message", out queryString))
+                    {
+                        messagequeue.Enqueue(queryString);
+
+                        await context.Response.WriteAsync(queryString);
+                    }
+                    await context.Response.WriteAsync("try again with message querystring");
+
+                });
             });
         }
     }
