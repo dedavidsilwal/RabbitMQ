@@ -32,19 +32,31 @@ namespace Service1
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    Microsoft.Extensions.Primitives.StringValues queryString;
+                    //Microsoft.Extensions.Primitives.StringValues queryString;
 
+                    //using var scope = app.ApplicationServices.CreateScope();
+                    //var messagequeue = scope.ServiceProvider.GetRequiredService<MessagingQueueService>();
+
+                    //if (context.Request.Query.TryGetValue("message", out queryString))
+                    //{
+                    //    messagequeue.Enqueue(queryString);
+
+                    //    await context.Response.WriteAsync(queryString);
+                    //}
+                    await context.Response.WriteAsync("try again with message querystring");
+
+                });
+
+
+                endpoints.MapGet("/{message:alpha}", async context =>
+                {
                     using var scope = app.ApplicationServices.CreateScope();
                     var messagequeue = scope.ServiceProvider.GetRequiredService<MessagingQueueService>();
 
-                    if (context.Request.Query.TryGetValue("message", out queryString))
-                    {
-                        messagequeue.Enqueue(queryString);
+                    var queryString = context.Request.RouteValues["message"].ToString();
+                    messagequeue.Enqueue(queryString);
 
-                        await context.Response.WriteAsync(queryString);
-                    }
-                    await context.Response.WriteAsync("try again with message querystring");
-
+                    await context.Response.WriteAsync(queryString);
                 });
             });
         }
