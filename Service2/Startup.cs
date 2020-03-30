@@ -42,7 +42,10 @@ namespace Service2
 
                 endpoints.MapGet("/", async context =>
                 {
-                    var content = message.Message.ToString();
+                    using var scope = app.ApplicationServices.CreateScope();
+                    var messagequeue = scope.ServiceProvider.GetRequiredService<MessagingQueueService>();
+
+                    var content = messagequeue.Message.ToString();
                     await context.Response.WriteAsync(content);
                 });
             });
