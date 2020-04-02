@@ -9,6 +9,14 @@ services:
     volumes:
       - 'rabbitmq_data:/data'
 
+  rabbitmq-fallback:
+    image: "rabbitmq:3.8.3-management"
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - 'rabbitmq_data:/data'
+
   service2:
     image: service2
     build:

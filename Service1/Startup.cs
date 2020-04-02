@@ -49,11 +49,11 @@ namespace Service1
                 });
                 endpoints.MapGet("/{message:alpha}", async context =>
                 {
-                    //using var scope = app.ApplicationServices.CreateScope();
-                    //var messagequeue = scope.ServiceProvider.GetRequiredService<MessagingQueueService>();
+                    using var scope = app.ApplicationServices.CreateScope();
+                    var messagequeue = scope.ServiceProvider.GetRequiredService<MessagingQueueService>();
 
                     var queryString = context.Request.RouteValues["message"].ToString();
-                    //    messagequeue.Enqueue(queryString);
+                    messagequeue.Enqueue(queryString);
 
                     await context.Response.WriteAsync(queryString);
                 });
